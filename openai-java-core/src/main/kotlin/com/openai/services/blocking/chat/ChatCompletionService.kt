@@ -6,6 +6,8 @@ import com.google.errorprone.annotations.MustBeClosed
 import com.openai.core.RequestOptions
 import com.openai.core.http.HttpResponseFor
 import com.openai.core.http.StreamResponse
+import com.openai.helpers.StructuredChatCompletion
+import com.openai.helpers.StructuredChatCompletionCreateParams
 import com.openai.models.chat.completions.ChatCompletion
 import com.openai.models.chat.completions.ChatCompletionChunk
 import com.openai.models.chat.completions.ChatCompletionCreateParams
@@ -46,6 +48,13 @@ interface ChatCompletionService {
      */
     fun create(params: ChatCompletionCreateParams): ChatCompletion =
         create(params, RequestOptions.none())
+
+    fun <T> create(params: StructuredChatCompletionCreateParams<T>): StructuredChatCompletion<T> =
+        StructuredChatCompletion<T>(
+            params.responseFormat,
+            // Normal non-generic create method call via `ChatCompletionCreateParams`
+            create(params.params),
+        )
 
     /** @see [create] */
     fun create(

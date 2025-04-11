@@ -2,13 +2,12 @@ package com.openai.example;
 
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.helpers.StructuredChatCompletionCreateParams;
 import com.openai.helpers.StructuredOutputsBase;
-import com.openai.helpers.StructuredOutputsKt;
 import com.openai.models.ChatModel;
-import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import java.util.List;
 
-public class StructuredOutputsAutoExample {
+public class StructuredOutputsGenericsExample {
 
     public static class Person {
         public String givenName;
@@ -57,16 +56,15 @@ public class StructuredOutputsAutoExample {
     public static void main(String[] args) throws Exception {
         OpenAIClient client = OpenAIOkHttpClient.fromEnv();
 
-        ChatCompletionCreateParams createParams = ChatCompletionCreateParams.builder()
-                .model(ChatModel.GPT_4O_MINI)
-                .maxCompletionTokens(2048)
-                // `fromClass1` uses Victools; `fromClass2` uses Jackson.
-                .responseFormat(StructuredOutputsKt.fromClass1(Laureates.class))
-                .addUserMessage("Who won Nobel Prizes for physics?")
-                .build();
+        StructuredChatCompletionCreateParams<Laureates> createParams =
+                StructuredChatCompletionCreateParams.<Laureates>builder()
+                        .model(ChatModel.GPT_4O_MINI)
+                        .responseFormat(Laureates.class)
+                        .addUserMessage("Who won Nobel Prizes for physics?")
+                        .build();
 
         client.chat().completions().create(createParams).choices().stream()
                 .flatMap(choice -> choice.message().content().stream())
-                .forEach(content -> System.out.println(StructuredOutputsKt.fromJson(content, Laureates.class)));
+                .forEach(System.out::println);
     }
 }
